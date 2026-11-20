@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Scraper LK10">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon.svg">
+<title>Scraper LK10</title>
+<style>
+:root{
+  --bg:#0b0b10; --card:#15151d; --card2:#1c1c27; --line:#262634; --txt:#f2f2f7; --mut:#8b8ba0;
+  --red:#e50914; --grn:#2ecc71; --org:#f5a623; --blu:#4da3ff; --pur:#a78bfa;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);
+  font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{padding-top:env(safe-area-inset-top,0px);overflow-x:hidden}
+button,input{font:inherit;color:inherit}
+#app{max-width:720px;margin:0 auto;padding:12px 14px calc(84px + env(safe-area-inset-bottom,0px))}
+header{display:flex;align-items:center;gap:10px;margin:4px 0 14px}
+header h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.2px}
+header h1 b{color:var(--red)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--mut);margin-left:auto}
+.dot.on{background:var(--grn);box-shadow:0 0 0 4px rgba(46,204,113,.18);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(46,204,113,0)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:16px;margin:0 0 2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.desc{color:var(--mut);font-size:13px;margin:0 0 10px}
+.badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--card2);color:var(--mut);white-space:nowrap}
+.badge.running{background:rgba(46,204,113,.15);color:var(--grn)}
+.badge.waiting{background:rgba(245,166,35,.15);color:var(--org)}
+.badge.finished{background:rgba(77,163,255,.15);color:var(--blu)}
+.badge.stopped,.badge.interrupted{background:rgba(139,139,160,.18);color:var(--mut)}
+.badge.blocked,.badge.error{background:rgba(229,9,20,.18);color:#ff6b73}
+.bar{height:8px;background:var(--card2);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--red),#ff5a5f);border-radius:99px;transition:width .6s}
+.bar.ind>i{width:35%!important;animation:ind 1.3s infinite ease-in-out}
+@keyframes ind{0%{margin-left:-35%}100%{margin-left:100%}}
+.row{display:flex;justify-content:space-between;gap:8px;color:var(--mut);font-size:12.5px}
+.cur{margin:8px 0 2px;font-weight:600;word-break:break-word}
+.det{color:var(--mut);font-size:12.5px;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{background:var(--card2);border-radius:10px;padding:5px 9px;font-size:12.5px}
+.btns{display:flex;gap:8px;margin-top:6px}
+.btn{flex:1;border:0;border-radius:12px;padding:12px;font-weight:700;background:var(--card2);cursor:pointer}
+.btn.go{background:var(--red);color:#fff}
+.btn.stop{background:#3a1a1d;color:#ff8a90}
+.btn.small{flex:0;padding:12px 14px;color:var(--mut)}
+.btn:disabled{opacity:.4}
+input[type=text],input[type=password]{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin:2px 0 8px;outline:0}
+input:focus{border-color:var(--red)}
+label.sw{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13.5px;margin:6px 0 12px}
+.empty{color:var(--mut);text-align:center;padding:26px 10px}
+.err{border-left:3px solid var(--red);padding:7px 10px;margin:6px 0;background:var(--card2);border-radius:0 10px 10px 0;font-size:12.5px;word-break:break-word}
+.err.w{border-color:var(--org)}
+.err small{display:block;color:var(--mut);margin-bottom:2px}
+.sec{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);margin:18px 2px 8px;font-weight:700}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:none;padding:9px;border-radius:9px;color:var(--mut);font-weight:700}
+.seg button.on{background:var(--card2);color:var(--txt)}
+.item{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}
+.ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--card2);flex:none}
+.item .t{font-weight:600;word-break:break-word}
+.item .s{color:var(--mut);font-size:12px}
+.pill{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;margin-right:6px}
+.pill.c{background:rgba(46,204,113,.15);color:var(--grn)}
+.pill.u{background:rgba(167,139,250,.18);color:var(--pur)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.kpi b{font-size:24px;display:block}
+.kpi span{color:var(--mut);font-size:12px}
+#log{background:#07070a;border:1px solid var(--line);border-radius:14px;padding:10px;height:56vh;overflow:auto;
+  font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;word-break:break-word}
+#log div{padding:1px 0}
+#log .WARNING{color:var(--org)} #log .ERROR,#log .CRITICAL{color:#ff6b73} #log .t{color:#5d5d72;margin-right:6px}
+nav{position:fixed;left:0;right:0;bottom:0;background:rgba(15,15,22,.94);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:9}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600}
+nav button span{font-size:21px;line-height:1}
+nav button.on{color:#fff}
+nav button.on span{filter:drop-shadow(0 0 8px rgba(229,9,20,.8))}
+.login{min-height:80vh;display:flex;flex-direction:column;justify-content:center;gap:10px;max-width:360px;margin:0 auto}
+.login h1{font-size:28px;margin:0 0 6px}
+.login .btn{flex:none}
+.login input[type=password],.login input[type=text]{font-size:16px;color:var(--txt);-webkit-text-fill-color:var(--txt);caret-color:var(--red)}
+.login .show{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:13px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:#2a2a38;
+  padding:10px 16px;border-radius:12px;z-index:20;max-width:90vw;box-shadow:0 8px 30px #000a}
+.hide{display:none!important}
+
+/* ===== v2 : design + responsive ===== */
+:root{color-scheme:dark;--r:16px}
+html{-webkit-text-size-adjust:100%}
+body{background:radial-gradient(1200px 500px at 50% -150px,rgba(229,9,20,.10),transparent 70%),var(--bg);background-attachment:fixed}
+input,button{touch-action:manipulation}
+input[type=text],input[type=password]{font-size:16px;min-height:46px}
+.btn{min-height:46px;transition:transform .08s,filter .15s,background .15s}
+.btn:hover:not(:disabled){filter:brightness(1.12)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn.go{box-shadow:0 6px 18px rgba(229,9,20,.28)}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+header{position:sticky;top:0;z-index:8;margin:0 -14px 14px;padding:10px 14px;background:rgba(11,11,16,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+header .out{background:var(--card2);border:1px solid var(--line);border-radius:10px;width:36px;height:36px;color:var(--mut);cursor:pointer;font-size:16px}
+header .out:hover{color:#fff}
+.card{box-shadow:0 2px 12px rgba(0,0,0,.25);transition:border-color .2s}
+.card:hover{border-color:#34344a}
+.bar{height:10px}
+.chip{border:1px solid var(--line)}
+.seg{overflow-x:auto;scrollbar-width:none;gap:2px}
+.seg::-webkit-scrollbar{display:none}
+.seg button{white-space:nowrap;min-height:40px;cursor:pointer}
+.item{padding:12px 0}
+.toast{animation:tin .2s ease-out}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}}
+#log{height:calc(100dvh - 290px);min-height:260px}
+nav button{cursor:pointer;min-height:52px;position:relative;transition:color .15s}
+nav button.on::after{content:"";position:absolute;top:-7px;width:28px;height:3px;border-radius:0 0 4px 4px;background:var(--red)}
+.login{animation:tin .3s ease-out}
+.login h1{font-size:32px;text-align:center;margin-bottom:14px}
+.login .btn{min-height:50px}
+@media(min-width:600px){.kpis{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:380px){
+  #app{padding-left:10px;padding-right:10px}
+  header{margin:0 -10px 12px;padding:10px}
+  .card{padding:12px}
+  .btn{padding:10px}
+  .btn.small{padding:10px 12px}
+  .kpi b{font-size:21px}
+}
+@media(min-width:900px){
+  #app{max-width:1080px;display:grid;grid-template-columns:190px minmax(0,1fr);grid-template-areas:"h h" "n v";gap:0 26px;padding:12px 20px 30px;align-content:start}
+  header{grid-area:h;margin:0 -20px 18px;padding:12px 20px}
+  #view{grid-area:v;max-width:780px}
+  nav{grid-area:n;position:sticky;top:76px;align-self:start;flex-direction:column;gap:4px;padding:8px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);backdrop-filter:none}
+  nav button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;font-size:14px;border-radius:12px;min-height:44px}
+  nav button:hover{background:var(--card2);color:#fff}
+  nav button.on{background:var(--card2)}
+  nav button.on::after{top:10px;bottom:10px;left:0;width:3px;height:auto;border-radius:0 4px 4px 0}
+  #log{height:calc(100vh - 230px)}
+  .toast{bottom:28px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const app = $('#app');
+let token = localStorage.getItem('tok') || '';
+let tab = 'ctrl', timer = null, status = null, logAfter = 0, logScript = '', errOnly = false;
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const STATUS = {running:'En cours', waiting:'Relance auto…', finished:'Terminé', stopped:'Arrêté', blocked:'Bloqué (reprise possible)',
+  error:'Erreur', interrupted:'Interrompu'};
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, {...opts, headers: {'Content-Type':'application/json', Authorization:'Bearer ' + token, ...(opts.headers||{})},
+    body: opts.body ? JSON.stringify(opts.body) : undefined});
+  if (r.status === 401 && path !== '/api/login') { token = ''; localStorage.removeItem('tok'); render(); throw new Error('401'); }
+  return r.json();
+}
+function toast(t) {
+  const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3200);
+}
+function ago(iso) {
+  if (!iso) return '';
+  const s = Math.max(0, (Date.now() - new Date(iso)) / 1000);
+  if (s < 60) return 'à l’instant';
+  if (s < 3600) return `il y a ${Math.floor(s / 60)} min`;
+  if (s < 86400) return `il y a ${Math.floor(s / 3600)} h`;
+  return new Date(iso).toLocaleDateString('fr-FR', {day:'2-digit', month:'short'}) + ' ' +
+         new Date(iso).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+}
+
+/* ---------- squelette ---------- */
+function render() {
+  clearInterval(timer);
+  if (!token) {
+    app.innerHTML = `<div class="login"><h1>Scraper <span style="color:var(--red)">LK10</span></h1>
+      <input id="pw" type="password" placeholder="Mot de passe" autocomplete="current-password">
+      <label class="show"><input type="checkbox" id="sp"> Afficher le mot de passe</label>
+      <button class="btn go" id="lg">Entrer</button></div>`;
+    const go = async () => {
+      const b = $('#lg'); if (b.disabled) return;
+      b.disabled = true; b.textContent = 'Connexion…';
+      try {
+        const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: $('#pw').value})});
+        const j = await r.json();
+        if (j.token) { token = j.token; localStorage.setItem('tok', token); render(); return; }
+        toast(j.error || 'Erreur'); $('#pw').select();
+      } catch { toast('Serveur injoignable (il se réveille ?), réessaie dans un instant'); }
+      b.disabled = false; b.textContent = 'Entrer';
+    };
+    $('#lg').onclick = go; $('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    $('#sp').onchange = e => { $('#pw').type = e.target.checked ? 'text' : 'password'; };
+    $('#pw').focus();
+    return;
+  }
+  app.innerHTML = `<header><h1>Scraper <b>LK10</b></h1><div class="dot" id="dot" title="Un script tourne"></div><button class="out" id="out" title="Se déconnecter" aria-label="Se déconnecter">⎋</button></header>
+    <div id="view"></div>
+    <nav>
+      <button data-t="ctrl"><span>🎛️</span>Contrôle</button>
+      <button data-t="serie"><span>📺</span>Séries</button>
+      <button data-t="film"><span>🎬</span>Films</button>
+      <button data-t="log"><span>🧾</span>Journal</button>
+    </nav>`;
+  document.querySelectorAll('nav button').forEach(b => b.onclick = () => { tab = b.dataset.t; logAfter = 0; show(); });
+  $('#out').onclick = () => { token = ''; localStorage.removeItem('tok'); render(); };
+  show();
+}
+function show() {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+  clearInterval(timer);
+  const fn = {ctrl: viewCtrl, serie: () => viewKind('serie'), film: () => viewKind('film'), log: viewLog}[tab];
+  fn();
+  timer = setInterval(fn, tab === 'log' ? 2000 : 3000);
+}
+
+/* ---------- Contrôle ---------- */
+let kwValue = null, autoRetry = true, ctrlBuilt = false;
+async function viewCtrl() {
+  let st, er;
+  try { [st, er] = await Promise.all([api('/api/status'), api('/api/errors?limit=8')]); } catch { return; }
+  status = st;
+  $('#dot').classList.toggle('on', st.running > 0);
+  const view = $('#view');
+  // on ne reconstruit pas pendant que l'utilisateur tape dans le champ mot-clés
+  if (document.activeElement && document.activeElement.id === 'kw') { kwValue = document.activeElement.value; return; }
+  const cards = st.scripts.map(s => {
+    const r = s.run || {}, p = r.progress || {}, k = r.stats || {};
+    const pct = p.total ? Math.min(100, Math.round((p.page || 0) / p.total * 100)) : 0;
+    const label = p.total ? (s.id === 'series_genre' ? `Page ${p.page}/${p.total}` : `Page ${p.page || 0}/${p.total}`) : (p.page ? `Page ${p.page}` : '');
+    if (!s.available) return `<div class="card" style="opacity:.55"><h2>${esc(s.label)} <span class="badge">non installé</span></h2>
+      <p class="desc">Dépose <b>${esc(s.file)}</b> dans le dossier <b>scripts/</b> du projet pour l’activer.</p></div>`;
+    const kw = s.keywords ? `<input type="text" id="kw" placeholder="mots-clés séparés par des virgules" value="${esc(kwValue ?? s.keywords)}">` : '';
+    return `<div class="card"><h2>${esc(s.label)} ${r.status ? `<span class="badge ${r.status}">${STATUS[r.status] || r.status}</span>` : ''}</h2>
+      <p class="desc">${esc(s.desc)}</p>
+      ${s.running || r.status ? `
+        <div class="bar ${s.running && !p.total ? 'ind' : ''}"><i style="width:${s.running || r.status === 'finished' ? (r.status === 'finished' ? 100 : pct) : pct}%"></i></div>
+        <div class="row"><span>${label}${p.items ? ` · saison ${p.item}/${p.items}` : ''}</span><span>${p.total ? (r.status === 'finished' ? 100 : pct) + ' %' : ''}</span></div>
+        ${s.running && r.current ? `<div class="cur">▶ ${esc(r.current)}</div>` : ''}
+        ${s.running && r.detail ? `<div class="det">${esc(r.detail)}</div>` : ''}
+        <div class="chips"><span class="chip">✨ ${k.created || 0} créés</span><span class="chip">🛠️ ${k.updated || 0} mis à jour</span>
+          <span class="chip">⏭️ ${k.skipped || 0} ignorés</span><span class="chip">❌ ${k.failed || 0} échecs</span>
+          <span class="chip">⚠️ ${k.warnings || 0} alertes</span>${r.retries ? `<span class="chip">🔁 relance ${r.retries}</span>` : ''}</div>` : ''}
+      ${s.running ? '' : kw}
+      <div class="btns">
+        ${s.running ? `<button class="btn stop" data-stop="${s.id}">■ Arrêter</button>`
+                    : `<button class="btn go" data-go="${s.id}">▶ ${r.status && ['blocked','stopped','interrupted','error'].includes(r.status) ? 'Reprendre' : 'Lancer'}</button>
+                       <button class="btn small" data-reset="${s.id}" title="Repartir de zéro">↺</button>`}
+      </div></div>`;
+  }).join('');
+  const avail = st.scripts.filter(s => s.available).map(s => s.id);
+  const errs = (er.errors || []).map(e => `<div class="err ${e.level === 'WARNING' ? 'w' : ''}"><small>${esc(e.script)} · ${ago(e.ts)}</small>${esc(e.msg)}</div>`).join('')
+    || '<div class="empty">Aucune erreur 🎉</div>';
+  view.innerHTML = `${cards}
+    <label class="sw"><input type="checkbox" id="ar" ${autoRetry ? 'checked' : ''}> Relancer automatiquement si le site bloque ou plante</label>
+    ${avail.length > 1 ? `<button class="btn" id="all" ${st.running ? 'disabled' : ''}>▶▶ Tout lancer à la suite</button>` : ''}
+    <div class="sec">Dernières erreurs & alertes</div><div class="card">${errs}</div>`;
+  $('#ar').onchange = e => autoRetry = e.target.checked;
+  view.querySelectorAll('[data-go]').forEach(b => b.onclick = () => start([b.dataset.go]));
+  view.querySelectorAll('[data-stop]').forEach(b => b.onclick = async () => { await api('/api/stop', {method:'POST', body:{script:b.dataset.stop}}); toast('Arrêt demandé…'); viewCtrl(); });
+  view.querySelectorAll('[data-reset]').forEach(b => b.onclick = async () => {
+    if (!confirm('Repartir de zéro ? La progression sauvegardée (page, saisons déjà faites) sera effacée.')) return;
+    const j = await api('/api/reset', {method:'POST', body:{script:b.dataset.reset}}); toast(j.error || 'Progression effacée'); });
+  if ($('#all')) $('#all').onclick = () => start(avail);
+}
+async function start(ids) {
+  const kw = $('#kw') ? $('#kw').value : '';
+  kwValue = kw || kwValue;
+  const j = await api('/api/start', {method:'POST', body:{scripts: ids, keywords: kw, auto_retry: autoRetry}});
+  toast(j.error || 'Lancé ✅'); viewCtrl();
+}
+
+/* ---------- Séries / Films ---------- */
+let filter = {serie: '', film: ''};
+async function viewKind(kind) {
+  let st, it;
+  try { [st, it] = await Promise.all([api('/api/status'), api(`/api/items?kind=${kind}&limit=80&action=${filter[kind]}`)]); } catch { return; }
+  $('#dot').classList.toggle('on', st.running > 0);
+  const mine = st.scripts.filter(s => s.kind === kind && s.available);
+  const running = mine.filter(s => s.running);
+  const word = kind === 'serie' ? 'séries' : 'films';
+  const cur = running.length ? running.map(s => {
+    const r = s.run || {}, p = r.progress || {};
+    return `<div class="card"><h2>${esc(s.label)} <span class="badge ${r.status}">${STATUS[r.status] || ''}</span></h2>
+      ${p.total ? `<div class="bar"><i style="width:${Math.min(100, Math.round((p.page || 0) / p.total * 100))}%"></i></div><div class="row"><span>Page ${p.page || 0}/${p.total}</span><span>${Math.round((p.page || 0) / p.total * 100)} %</span></div>` : ''}
+      <div class="cur">${r.current ? '▶ ' + esc(r.current) : 'Démarrage…'}</div>${r.detail ? `<div class="det">${esc(r.detail)}</div>` : ''}</div>`;
+  }).join('') : `<div class="card"><div class="empty" style="padding:10px">Aucun script ${word} en cours.</div></div>`;
+  const c = it.counts;
+  const list = it.items.map(i => `<div class="item"><div class="ic">${i.action === 'created' ? '✨' : '🛠️'}</div>
+    <div><div class="t">${esc(i.title)}</div><div class="s"><span class="pill ${i.action === 'created' ? 'c' : 'u'}">${i.action === 'created' ? 'Nouveau' : 'Mis à jour'}</span>${ago(i.ts)}</div></div></div>`).join('')
+    || `<div class="empty">Rien d’ajouté pour l’instant.</div>`;
+  $('#view').innerHTML = `<div class="sec" style="margin-top:0">En cours</div>${cur}
+    <div class="kpis"><div class="kpi"><b>${c.created_24h}</b><span>créés (24 h)</span></div><div class="kpi"><b>${c.updated_24h}</b><span>mis à jour (24 h)</span></div>
+      <div class="kpi"><b>${c.created_total}</b><span>créés au total</span></div><div class="kpi"><b>${c.updated_total}</b><span>mis à jour au total</span></div></div>
+    <div class="sec">Ajoutés</div>
+    <div class="seg"><button data-f="" class="${filter[kind] === '' ? 'on' : ''}">Tout</button><button data-f="created" class="${filter[kind] === 'created' ? 'on' : ''}">Nouveaux</button><button data-f="updated" class="${filter[kind] === 'updated' ? 'on' : ''}">Mis à jour</button></div>
+    <div class="card">${list}</div>`;
+  document.querySelectorAll('.seg button').forEach(b => b.onclick = () => { filter[kind] = b.dataset.f; viewKind(kind); });
+}
+
+/* ---------- Journal ---------- */
+async function viewLog() {
+  const view = $('#view');
+  if (!$('#log')) {
+    const st = await api('/api/status'); status = st;
+    const opts = st.scripts.filter(s => s.available);
+    if (!logScript || !opts.find(o => o.id === logScript)) logScript = (opts.find(o => o.running) || opts[0] || {}).id || '';
+    view.innerHTML = `<div class="seg" id="ls">${opts.map(o => `<button data-s="${o.id}" class="${o.id === logScript ? 'on' : ''}">${esc(o.label.replace(' · ', '\u00a0·\u00a0'))}</button>`).join('')}</div>
+      <label class="sw"><input type="checkbox" id="eo" ${errOnly ? 'checked' : ''}> Afficher seulement les erreurs / alertes</label><div id="log"></div>`;
+    $('#ls').querySelectorAll('button').forEach(b => b.onclick = () => { logScript = b.dataset.s; logAfter = 0; view.innerHTML = ''; viewLog(); });
+    $('#eo').onchange = e => { errOnly = e.target.checked; logAfter = 0; $('#log').innerHTML = ''; };
+  }
+  if (!logScript) return;
+  const j = await api(`/api/log?script=${logScript}&after=${logAfter}`).catch(() => null);
+  if (!j) return;
+  const box = $('#log'), atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+  if (j.last < logAfter) { logAfter = 0; box.innerHTML = ''; }
+  j.lines.forEach(l => {
+    if (errOnly && !['WARNING', 'ERROR', 'CRITICAL'].includes(l.l)) return;
+    const d = document.createElement('div'); d.className = l.l;
+    d.innerHTML = `<span class="t">${l.t}</span>${esc(l.m)}`; box.appendChild(d);
+  });
+  while (box.children.length > 500) box.removeChild(box.firstChild);
+  logAfter = j.last || logAfter;
+  if (atBottom) box.scrollTop = box.scrollHeight;
+  $('#dot').classList.toggle('on', !!j.alive);
+}
+
+render();
+</script>
+</body>
+</html>

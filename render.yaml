@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: scraper-lk10
+    runtime: docker
+    plan: standard          # 2 Go de RAM : Chromium a besoin de place
+    healthCheckPath: /health
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: DASH_PASSWORD
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        value: Admin
+      - key: ADMIN_PASSWORD
+        sync: false
