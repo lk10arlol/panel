@@ -145,6 +145,8 @@ nav button.on::after{content:"";position:absolute;top:-7px;width:28px;height:3px
   #log{height:calc(100vh - 230px)}
   .toast{bottom:28px}
 }
+#app.auth{display:block;max-width:480px;padding-top:0}
+.login{width:100%}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -183,6 +185,7 @@ function ago(iso) {
 /* ---------- squelette ---------- */
 function render() {
   clearInterval(timer);
+  app.className = token ? '' : 'auth';
   if (!token) {
     app.innerHTML = `<div class="login"><h1>Scraper <span style="color:var(--red)">LK10</span></h1>
       <input id="pw" type="password" placeholder="Mot de passe" autocomplete="current-password">
